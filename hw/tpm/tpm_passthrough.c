@@ -55,7 +55,10 @@ static const VMStateDescription vmstate_tpm_cuse;
 
 /* data structures */
 typedef struct TPMPassthruThreadParams {
-    TPMState *tpm_state;
+    void *tpm_state;
+
+    uint8_t *locty_number;
+    TPMLocality **locty_data;
 
     TPMRecvDataCB *recv_data_callback;
     TPMBackend *tb;
@@ -276,12 +279,12 @@ static void tpm_passthrough_worker_thread(gpointer data,
     switch (cmd) {
     case TPM_BACKEND_CMD_PROCESS_CMD:
         tpm_passthrough_unix_transfer(tpm_pt,
-                                      thr_parms->tpm_state->locty_number,
-                                      thr_parms->tpm_state->locty_data,
+                                      *thr_parms->locty_number,
+                                      *thr_parms->locty_data,
                                       &selftest_done);
 
         thr_parms->recv_data_callback(thr_parms->tpm_state,
-                                      thr_parms->tpm_state->locty_number,
+                                      *thr_parms->locty_number,
                                       selftest_done);
         /* result delivered */
         qemu_mutex_lock(&tpm_pt->state_lock);
@@ -424,12 +427,15 @@ static void tpm_passthrough_reset(TPMBackend *tb)
     tpm_pt->tpm_busy = false;
 }
 
-static int tpm_passthrough_init(TPMBackend *tb, TPMState *s,
+static int tpm_passthrough_init(TPMBackend *tb, void *tpm_state,
+                                uint8_t *locty_number, TPMLocality **locty_data,
                                 TPMRecvDataCB *recv_data_cb)
 {
     TPMPassthruState *tpm_pt = TPM_PASSTHROUGH(tb);
 
-    tpm_pt->tpm_thread_params.tpm_state = s;
+    tpm_pt->tpm_thread_params.tpm_state = tpm_state;
+    tpm_pt->tpm_thread_params.locty_number = locty_number;
+    tpm_pt->tpm_thread_params.locty_data = locty_data;
     tpm_pt->tpm_thread_params.recv_data_callback = recv_data_cb;
     tpm_pt->tpm_thread_params.tb = tb;
 

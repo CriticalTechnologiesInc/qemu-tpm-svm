@@ -41,12 +41,13 @@ void tpm_backend_destroy(TPMBackend *s)
     k->ops->destroy(s);
 }
 
-int tpm_backend_init(TPMBackend *s, TPMState *state,
+int tpm_backend_init(TPMBackend *s, void *state,
+                     uint8_t *locty_number, TPMLocality **locty_data,
                      TPMRecvDataCB *datacb)
 {
     TPMBackendClass *k = TPM_BACKEND_GET_CLASS(s);
 
-    return k->ops->init(s, state, datacb);
+    return k->ops->init(s, state, locty_number, locty_data, datacb);
 }
 
 int tpm_backend_startup_tpm(TPMBackend *s)

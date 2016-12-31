@@ -396,9 +396,10 @@ static void tpm_tis_receive_bh(void *opaque)
 /*
  * Callback from the TPM to indicate that the response was received.
  */
-static void tpm_tis_receive_cb(TPMState *s, uint8_t locty,
+static void tpm_tis_receive_cb(void *opaque, uint8_t locty,
                                bool is_selftest_done)
 {
+    TPMState *s = opaque;
     TPMTISEmuState *tis = &s->s.tis;
     uint8_t l;
 
@@ -1190,7 +1191,9 @@ static void tpm_tis_realizefn(DeviceState *dev, Error **errp)
 
     s->be_driver->fe_model = TPM_MODEL_TPM_TIS;
 
-    if (tpm_backend_init(s->be_driver, s, tpm_tis_receive_cb)) {
+    if (tpm_backend_init(s->be_driver, s,
+                         &s->locty_number, &s->locty_data,
+                         tpm_tis_receive_cb)) {
         error_setg(errp, "tpm_tis: backend driver with id %s could not be "
                    "initialized", s->backend);
         return;

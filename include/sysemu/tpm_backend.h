@@ -32,6 +32,8 @@ typedef struct TPMBackend TPMBackend;
 
 typedef struct TPMDriverOps TPMDriverOps;
 
+typedef struct TPMLocality TPMLocality;
+
 struct TPMBackendClass {
     ObjectClass parent_class;
 
@@ -55,7 +57,7 @@ struct TPMBackend {
     QLIST_ENTRY(TPMBackend) list;
 };
 
-typedef void (TPMRecvDataCB)(TPMState *, uint8_t locty, bool selftest_done);
+typedef void (TPMRecvDataCB)(void *, uint8_t locty, bool selftest_done);
 
 typedef struct TPMSizedBuffer {
     uint32_t size;
@@ -84,7 +86,9 @@ struct TPMDriverOps {
     void (*destroy)(TPMBackend *t);
 
     /* initialize the backend */
-    int (*init)(TPMBackend *t, TPMState *s, TPMRecvDataCB *datacb);
+    int (*init)(TPMBackend *t, void *tpm_state,
+                uint8_t *locty_number, TPMLocality **locty_data,
+                TPMRecvDataCB *datacb);
     /* start up the TPM on the backend */
     int (*startup_tpm)(TPMBackend *t);
     /* returns true if nothing will ever answer TPM requests */
@@ -131,14 +135,17 @@ void tpm_backend_destroy(TPMBackend *s);
 /**
  * tpm_backend_init:
  * @s: the backend to initialized
- * @state: TPMState
+ * @state: opaque pointer to TPM state
+ * @locty_number: pointer to locality_number
+ * @locty_data: pointer to locality_data pointer
  * @datacb: callback for sending data to frontend
  *
  * Initialize the backend with the given variables.
  *
  * Returns 0 on success.
  */
-int tpm_backend_init(TPMBackend *s, TPMState *state,
+int tpm_backend_init(TPMBackend *s, void *state,
+                     uint8_t *locty_number, TPMLocality **locty_data,
                      TPMRecvDataCB *datacb);
 
 /**
