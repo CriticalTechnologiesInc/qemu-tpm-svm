@@ -27,6 +27,7 @@ typedef enum  TPMVersion {
 } TPMVersion;
 
 TPMVersion tpm_tis_get_tpm_version(Object *obj);
+TPMVersion spapr_vtpm_get_tpm_version(Object *obj);
 
 #define TYPE_TPM_TIS                "tpm-tis"
 

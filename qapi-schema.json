@@ -3939,8 +3939,12 @@
 # @tpm-tis: TPM TIS model
 #
 # Since: 1.5
+#
+# @spapr-vtpm: PPC64 vTPM device model
+#
+# Since: 2.6
 ##
-{ 'enum': 'TpmModel', 'data': [ 'tpm-tis' ] }
+{ 'enum': 'TpmModel', 'data': [ 'tpm-tis', 'spapr-vtpm' ] }
 
 ##
 # @query-tpm-models:
