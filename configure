@@ -3296,7 +3296,8 @@ fi
 ##########################################
 # TPM passthrough is only on x86 Linux
 
-if test "$targetos" = Linux && test "$cpu" = i386 -o "$cpu" = x86_64; then
+if test "$targetos" = Linux && test "$cpu" = i386 -o "$cpu" = x86_64 \
+    -o "$cpu" = ppc64; then
   tpm_passthrough=$tpm
 else
   tpm_passthrough=no
