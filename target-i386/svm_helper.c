@@ -457,9 +457,12 @@ void helper_clgi(CPUX86State *env)
 
 void helper_skinit(CPUX86State *env)
 {
+    CPUState *cs = CPU(x86_env_get_cpu(env));
     cpu_svm_check_intercept_param(env, SVM_EXIT_SKINIT, 0);
-    /* XXX: not implemented */
-    raise_exception(env, EXCP06_ILLOP);
+
+    env->regs[R_EAX] &= 0xFFFF0000;
+    env->regs[R_ESP] = env->regs[R_EAX] + 0x00010000;
+    env->eip = env->regs[R_EAX] + (uint16_t)x86_lduw_phys(cs, env->regs[R_EAX]);
 }
 
 void helper_invlpga(CPUX86State *env, int aflag)
